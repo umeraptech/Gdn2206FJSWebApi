@@ -6,9 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Members Web Api</title>
-    
-   
-   
+
+
+
 </head>
 
 <body>
@@ -22,20 +22,21 @@
                     <a href="javascript:void(0)" id="insert" class="btn btn-success">Insert</a>
                 </p>
             </div>
-            
+
         </div>
-        <div >
+        <div>
             <table id="data" class="table table-bordered table-striped">
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
                     <th>Batch</th>
+                    <th>Action</th>
                 </tr>
             </table>
         </div>
         <div>
-            
-          
+
+
             <div class="modal fade" id="modal-members">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -45,82 +46,145 @@
                         </div>
                         <div class="modal-body">
                             <form>
-                                <input type="hidden" name="m_id">
+                                <input type="hidden" name="m_id" id="m_id">
                                 <div class="form-group">
                                     <label for="m_name">Member Name</label>
-                                    <input id="m_name" class="form-control" placeholder="Enter Member Name" type="text" name="m_name">
+                                    <input id="m_name" class="form-control" placeholder="Enter Member Name" type="text"
+                                        name="m_name">
                                 </div>
                                 <div class="form-group">
                                     <label for="m_batch">Member Name</label>
-                                    <input id="m_batch" class="form-control" placeholder="Enter Member Batch" type="text" name="m_batch">
+                                    <input id="m_batch" class="form-control" placeholder="Enter Member Batch"
+                                        type="text" name="m_batch">
                                 </div>
                             </form>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="button" id="btnSave" class="btn btn-primary">Save changes</button>
+                            <button type="button" id="btnSave" class="btn btn-primary" value="Insert">Save
+                                changes</button>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
     <script>
-            $(document).ready(function(e){
-                
-                loadData();
-                
-                function loadData(){
-                    $.getJSON("http://gdnexam.somee.com/api/members",function(data){
-                            //console.log(data);
-                            $.each(data, function(key,val){
-                                    $("<tr><td>"+val.m_id+"</td><td>"+val.m_name+"</td><td>"+val.m_batch+"</td></tr>").appendTo("#data");
-                            });
+        $(document).ready(function (e) {
+
+            loadData();
+
+            function loadData() {
+                $.getJSON("http://gdnexam.somee.com/api/members", function (data) {
+                    //console.log(data);
+                    $.each(data, function (key, val) {
+                        $("<tr><td>" + val.m_id + "</td><td>" + val.m_name + "</td><td>" + val.m_batch + "</td><td><a href='javascript:void(0)' data-id=" + val.m_id + " class='btn btn-sm btn-info edit-batch'>Update</a>&nbsp;<a class='btn btn-sm btn-danger'>delete</a></td></tr>").appendTo("#data");
                     });
-                }
-                $("#insert").click(function(){
-                    //alert("Aaoch");
-                    $("#modal-members").modal("show");
                 });
-                $("#btnSave").click(function(){
-                    //alert("Aaoch");
-                    let name = $("#m_name").val();
-                    let batch = $("#m_batch").val();
-                    //console.log(name+" "+batch); 
-
-                    let m = {
-                        "m_id":0,
-                        "m_name":name,
-                        "m_batch":batch
-                    }
-
-                    $.ajax({
-                        url:"http://gdnexam.somee.com/api/members",
-                        data: JSON.stringify(m),
-                        type:"POST",
-                        contentType:"application/json",
-                        success:function(data){
-                            $("#data").find("tr:gt(0)").remove();
-                            loadData();
-                            clearData();
-                        }
-                    });
-
-                    $("#modal-members").modal("hide");
-                });
-                function clearData(){
-                    $("#m_id").val("");
-                    $("#m_name").val("");
-                    $("#m_batch").val("");
-                }
+            }
+            $("#insert").click(function () {
+                //alert("Aaoch");
+                $("#modal-members").modal("show");
             });
-    </script>   
+            $("#btnSave").click(function () {
+                //alert("Aaoch");
+
+                let status = $("#btnSave").val();
+                console.log(status);
+
+                switch (status) {
+                    case "Insert":
+                        let name = $("#m_name").val();
+                        let batch = $("#m_batch").val();
+                        //console.log(name+" "+batch); 
+
+                        let m = {
+                            "m_id": 0,
+                            "m_name": name,
+                            "m_batch": batch
+                        }
+
+                        $.ajax({
+                            url: "http://gdnexam.somee.com/api/members",
+                            data: JSON.stringify(m),
+                            type: "POST",
+                            contentType: "application/json",
+                            success: function (data) {
+                                $("#data").find("tr:gt(0)").remove();
+                                loadData();
+                                clearData();
+                            }
+                        });
+
+                        break;
+                    case "Edit-Batch":
+                        let id1 = $("#m_id").val();
+                        let name1 = $("#m_name").val();
+                        let batch1 = $('#m_batch').val();
+
+                        let m1 = {
+                            m_id : id1,
+                            m_name: name1,
+                            m_batch: batch1    
+                        }
+
+                        //console.log(m1);
+                        $.ajax({
+                            url: "http://gdnexam.somee.com/api/members?id="+id1,
+                            data: JSON.stringify(m1),
+                            type: "PUT",
+                            contentType: "application/json",
+                            success: function (data) {
+                                $("#data").find("tr:gt(0)").remove();
+                                loadData();
+                                clearData();
+                            }
+                        });
+
+                        break;
+                    default:
+                    // code block
+                }
+
+
+                $("#modal-members").modal("hide");
+            });
+
+            $('body').on('click', '.edit-batch', function () {
+                //console.log("Edit button clicked");
+                let $id = $(this).data('id');
+                //console.log("Id Clicked: "+$id);
+
+                $.getJSON("http://gdnexam.somee.com/api/members?id=" + $id, function (data) {
+                    $("#m_id").val(data.m_id);
+                    $("#m_name").val(data.m_name);
+                    $("#m_batch").val(data.m_batch);
+                    $("#btnSave").val("Edit-Batch");
+
+                });
+
+                $("#modal-members").modal("show");
+                //http://gdnexam.somee.com/api/members?id=
+
+
+
+
+
+            });
+
+            function clearData() {
+                $("#m_id").val("");
+                $("#m_name").val("");
+                $("#m_batch").val("");
+            }
+        });
+    </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-   
+
 </body>
 
 </html>
